@@ -1,0 +1,68 @@
+# values.yaml para nicolas-sierra-dev
+
+# Configuración de autenticación
+auth:
+  enablePostgresUser: true
+  postgresPassword: "openshift"  # CAMBIA ESTO
+  username: "openshift"
+  password: "openshift"  # CAMBIA ESTO
+  database: "proj-openshift"
+
+# Configuración de arquitectura
+architecture: standalone
+
+# Configuración principal de PostgreSQL
+primary:
+  # Persistencia de datos
+  persistence:
+    enabled: true
+    storageClass: ""  # Usa el StorageClass por defecto de tu clúster
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+  
+  # Configuración de recursos
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  # Configuración de seguridad para OpenShift
+  containerSecurityContext:
+    enabled: true
+    runAsUser: "auto"
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+  
+  podSecurityContext:
+    enabled: true
+    fsGroup: "auto"
+  
+  # Configuración del servicio
+  service:
+    type: ClusterIP
+    ports:
+      postgresql: 5432
+
+# Configuración de seguridad global
+volumePermissions:
+  enabled: true
+  containerSecurityContext:
+    runAsUser: "auto"
+
+# Configuración de PostgreSQL
+postgresql:
+  maxConnections: "100"
+  sharedBuffers: "128MB"
+
+# Métricas (opcional)
+metrics:
+  enabled: false
