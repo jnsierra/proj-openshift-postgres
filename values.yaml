@@ -1,4 +1,9 @@
-# values.yaml para nicolas-sierra-dev
+# values.yaml para OpenShift sin permisos de admin
+
+# NO crear ServiceAccount personalizado, usar el default
+serviceAccount:
+  create: false
+  # Usará el ServiceAccount "default" del namespace
 
 # Configuración de autenticación
 auth:
@@ -11,17 +16,17 @@ auth:
 # Configuración de arquitectura
 architecture: standalone
 
-# Configuración principal de PostgreSQL
+# Configuración del primary
 primary:
-  # Persistencia de datos
+  # Persistencia
   persistence:
     enabled: true
-    storageClass: ""  # Usa el StorageClass por defecto de tu clúster
+    storageClass: ""
     size: 10Gi
     accessModes:
       - ReadWriteOnce
   
-  # Configuración de recursos
+  # Recursos
   resources:
     requests:
       memory: "256Mi"
@@ -30,39 +35,41 @@ primary:
       memory: "1Gi"
       cpu: "1000m"
   
-  # Configuración de seguridad para OpenShift
+  # CRÍTICO: Deshabilitar security contexts para que OpenShift los asigne
   containerSecurityContext:
-    enabled: true
-    runAsUser: "auto"
-    runAsNonRoot: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
-    capabilities:
-      drop:
-        - ALL
+    enabled: false
   
   podSecurityContext:
-    enabled: true
-    fsGroup: "auto"
+    enabled: false
   
-  # Configuración del servicio
+  # Servicio
   service:
     type: ClusterIP
     ports:
       postgresql: 5432
+  
+  # Configuración adicional para OpenShift
+  podAnnotations:
+    openshift.io/scc: restricted-v2
 
-# Configuración de seguridad global
+# CRÍTICO: Deshabilitar volumePermissions init container
+# Este init container es el que causa el problema de SCC
 volumePermissions:
-  enabled: true
-  containerSecurityContext:
-    runAsUser: "auto"
+  enabled: false
+
+# Deshabilitar shmVolume (puede causar problemas en restricted)
+shmVolume:
+  enabled: false
 
 # Configuración de PostgreSQL
 postgresql:
   maxConnections: "100"
   sharedBuffers: "128MB"
 
-# Métricas (opcional)
+# Métricas
 metrics:
+  enabled: false
+
+# Asegurarse de que no haya init containers problemáticos
+diagnosticMode:
   enabled: false
